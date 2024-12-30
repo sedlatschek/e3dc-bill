@@ -1,8 +1,8 @@
 
-import axios, { AxiosInstance } from "axios";
-import { JSDOM } from "jsdom";
-import { wrapper } from "axios-cookiejar-support";
-import { CookieJar } from "tough-cookie";
+import axios, { AxiosInstance } from 'axios';
+import { JSDOM } from 'jsdom';
+import { wrapper } from 'axios-cookiejar-support';
+import { CookieJar } from 'tough-cookie';
 
 let authClient: AxiosInstance | undefined;
 function getAuthClient(): AxiosInstance
@@ -20,7 +20,10 @@ function getAuthClient(): AxiosInstance
 /**
  * @returns JWT
  */
-export async function authenticate(username: string, password: string): Promise<string> {
+export async function authenticate(
+  username: string,
+  password: string,
+): Promise<string> {
   const authState = await getAuthState();
   const samlResponse = await getSAMLResponse(username, password, authState);
   return getToken(samlResponse);
@@ -34,13 +37,17 @@ function throwHtmlErrorIfExists(dom: JSDOM): void {
 }
 
 async function getAuthState(): Promise<string> {
-  console.log("Pinging login page to retrieve AuthState...");
+  console.log('Pinging login page to retrieve AuthState...');
 
   const response = await getAuthClient()({
     method: 'get',
     url: 'https://e3dc.e3dc.com/auth-saml/service-providers/customer/login?app=e3dc',
     withCredentials: true,
   });
+
+  if (typeof response.data !== 'string') {
+    throw new Error('Unexpected response data type');
+  }
 
   const dom = new JSDOM(response.data);
   throwHtmlErrorIfExists(dom);
@@ -58,8 +65,12 @@ async function getAuthState(): Promise<string> {
   return authState;
 }
 
-async function getSAMLResponse(username: string, password: string, authState: string): Promise<string> {
-  console.log("Sending login request...");
+async function getSAMLResponse(
+  username: string,
+  password: string,
+  authState: string,
+): Promise<string> {
+  console.log('Sending login request...');
 
   const form = new FormData();
   form.append('username', username);
@@ -75,6 +86,11 @@ async function getSAMLResponse(username: string, password: string, authState: st
       Origin: 'https://customer.sso.e3dc.com',
     },
   });
+
+
+  if (typeof response.data !== 'string') {
+    throw new Error('Unexpected response data type');
+  }
 
   const dom = new JSDOM(response.data);
   throwHtmlErrorIfExists(dom);
@@ -93,7 +109,7 @@ async function getSAMLResponse(username: string, password: string, authState: st
 }
 
 async function getToken(samlResponse: string): Promise<string> {
-  console.log("Retrieving Api authentication token...");
+  console.log('Retrieving Api authentication token...');
 
   const form = new FormData();
   form.append('SAMLResponse', samlResponse);
@@ -105,14 +121,20 @@ async function getToken(samlResponse: string): Promise<string> {
       Origin: 'https://customer.sso.e3dc.com',
       Referer: 'https://customer.sso.e3dc.com',
     },
-    data: form
+    data: form,
   });
 
-  const redirectUrl = response.request.res.responseUrl;
+  const request = response.request as { res: { responseUrl: unknown }};
+  const redirectUrl = request.res.responseUrl;
+
+  if (typeof redirectUrl !== 'string') {
+    throw new Error('Unexpected responseUrl type');
+  }
+
   const matches = redirectUrl.match(/token=(.+)&reAuthToken/);
 
-  if (matches.length !== 2) {
-    throw new Error("Unexpected input for redirectUrl");
+  if (matches?.length !== 2) {
+    throw new Error('Unexpected input for redirectUrl');
   }
 
   return matches[1];

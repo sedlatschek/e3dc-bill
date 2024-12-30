@@ -1,6 +1,6 @@
-import { DateTime } from "luxon";
-import { E3dcApi } from "../e3dc/E3dcApi.js";
-import { authenticate } from "../e3dc/auth.js";
+import { DateTime } from 'luxon';
+import { E3dcApi } from '../e3dc/E3dcApi.js';
+import { authenticate } from '../e3dc/auth.js';
 
 type GenerateMonthlySheetOptions = {
   from: DateTime;

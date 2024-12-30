@@ -1,11 +1,11 @@
-import axios from "axios";
+import axios from 'axios';
 
 export class E3dcApi {
   private readonly axiosClient
 
   public constructor(private readonly authToken: string) {
     this.axiosClient = axios.create({ headers: {
-      Authorization: `Bearer ${authToken}`
+      Authorization: `Bearer ${authToken}`,
     }});
   }
 
@@ -16,8 +16,8 @@ export class E3dcApi {
       headers: {
         Accept: 'application/json',
         Origin: 'https://my.e3dc.com',
-        Referer: 'https://my.e3dc.com/'
-      }
+        Referer: 'https://my.e3dc.com/',
+      },
     });
 
     console.log(response.status);
