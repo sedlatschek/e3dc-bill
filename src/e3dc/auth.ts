@@ -21,11 +21,17 @@ function getAuthClient(): AxiosInstance
  * @returns JWT
  */
 export async function authenticate(
-  username: string,
-  password: string,
+  options: {
+    username: string,
+    password: string,
+  },
 ): Promise<string> {
+  const { username, password } = options;
   const authState = await getAuthState();
-  const samlResponse = await getSAMLResponse(username, password, authState);
+  const samlResponse = await getSAMLResponse({
+    username,
+    password,
+    authState});
   return getToken(samlResponse);
 }
 
@@ -66,11 +72,15 @@ async function getAuthState(): Promise<string> {
 }
 
 async function getSAMLResponse(
-  username: string,
-  password: string,
-  authState: string,
+  options: {
+    username: string,
+    password: string,
+    authState: string,
+  },
 ): Promise<string> {
   console.log('Sending login request...');
+
+  const { username, password, authState } = options;
 
   const form = new FormData();
   form.append('username', username);

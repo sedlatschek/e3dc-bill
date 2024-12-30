@@ -1,15 +1,14 @@
-import globals from 'globals';
-import pluginJs from '@eslint/js';
-import tseslint from 'typescript-eslint';
-
+import globals from "globals";
+import pluginJs from "@eslint/js";
+import tseslint from "typescript-eslint";
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   {
-    ignores: ['dist/**/*', 'eslint.config.js'],
+    ignores: ["dist/**/*", "eslint.config.js"],
   },
   {
-    files: ['**/*.{js,mjs,cjs,ts}'],
+    files: ["**/*.{js,mjs,cjs,ts}"],
   },
   {
     languageOptions: { globals: globals.node },
@@ -26,10 +25,24 @@ export default [
   },
   {
     rules: {
-      'comma-dangle': ['error', 'always-multiline'],
-      'object-property-newline': ['error', { 'allowAllPropertiesOnSameLine': false }],
-      'quotes': ['error', 'single', { 'avoidEscape': true }],
-      'max-len': ['error', { 'code': 80, 'tabWidth': 4, 'ignoreUrls': true, 'ignoreStrings': true, 'ignoreTemplateLiterals': true, 'ignoreComments': true }],
+      indent: ["error", 2],
+      "comma-dangle": ["error", "always-multiline"],
+      "object-property-newline": [
+        "error",
+        { allowAllPropertiesOnSameLine: false },
+      ],
+      quotes: ["error", "single", { avoidEscape: true }],
+      "max-len": [
+        "error",
+        {
+          code: 80,
+          tabWidth: 4,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreComments: true,
+        },
+      ],
     },
   },
 ];

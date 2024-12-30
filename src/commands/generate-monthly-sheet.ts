@@ -11,7 +11,26 @@ type GenerateMonthlySheetOptions = {
 }
 
 export default async (options: GenerateMonthlySheetOptions): Promise<void> => {
-  const authToken = await authenticate(options.username, options.password);
+  const {
+    from,
+    to,
+    wallboxId,
+    username,
+    password,
+  } = options;
+
+
+  const authToken = await authenticate({
+    username,
+    password,
+  });
   const api = new E3dcApi(authToken);
-  await api.getChargings(options.wallboxId);
+  const chargings = await api.getChargings({
+    wallboxId,
+    from,
+    to,
+  });
+
+  console.log('chargings', chargings);
+  console.log('length', chargings.length);
 }

@@ -27,6 +27,10 @@ program.command('generate-monthly-sheet')
       throw new Error('Invalid to date');
     }
 
+    if (to < from) {
+      throw new Error('to date must be after from date');
+    }
+
     const wallboxId = parseInt(options.wallbox, 10);
 
     const { username, password } = options;
