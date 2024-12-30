@@ -1,0 +1,37 @@
+{
+  "name": "e3dc-bill",
+  "description": "CLI to generate bills out of E3DC wallbox data.",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sedlatschek/e3dc-bill.git"
+  },
+  "author": "Simon Sedlatschek <code@sedlatschek.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sedlatschek/e3dc-bill/issues"
+  },
+  "homepage": "https://github.com/sedlatschek/e3dc-bill#readme",
+  "devDependencies": {
+    "@types/jsdom": "^21.1.7",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^22.10.2",
+    "@types/tough-cookie": "^4.0.5",
+    "axios": "^1.7.9",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "axios-cookiejar-support": "^5.0.5",
+    "commander": "^13.0.0",
+    "jsdom": "^25.0.1",
+    "luxon": "^3.5.0",
+    "tough-cookie": "^5.0.0"
+  }
+}
