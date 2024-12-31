@@ -1,10 +1,11 @@
+import { join } from 'path';
+import { readFile } from 'fs/promises';
+import config from 'config';
+import ejs from 'ejs';
 import { DateTime } from 'luxon';
 import { Charging, E3dcApi } from '../../e3dc/E3dcApi.js';
 import { authenticate } from '../../e3dc/auth.js';
 import { createPdf } from '../../pdf.js';
-import ejs from 'ejs';
-import { readFile } from 'fs/promises';
-import config from 'config';
 
 type GenerateMonthlySheetOptions = {
   from: DateTime;
@@ -13,6 +14,9 @@ type GenerateMonthlySheetOptions = {
   username: string;
   password: string;
 }
+
+const templateFileName = join(import.meta.dirname, 'template.ejs');
+const template = await readFile(templateFileName, 'utf8');
 
 export default async (options: GenerateMonthlySheetOptions): Promise<void> => {
   const {
@@ -50,8 +54,6 @@ async function createInvoice(chargings: Charging[]): Promise<void> {
   const vat = subTotal * config.get<number>('localization.vatRate');
   const total = subTotal + vat;
 
-  const template = await readFile('src/commands/generate-monthly-sheet/invoice.ejs', 'utf8');
-
   const html = ejs.render(template, {
     document: 'invoice',
     ...config.get('document'),
@@ -77,8 +79,6 @@ async function createRefund(chargings: Charging[]): Promise<void> {
   const subTotal = totalEnergy * config.get<number>('document.unitPrice');
   const vat = subTotal * config.get<number>('localization.vatRate');
   const total = subTotal + vat;
-
-  const template = await readFile('src/commands/generate-monthly-sheet/invoice.ejs', 'utf8');
 
   const html = ejs.render(template, {
     document: 'refund',
