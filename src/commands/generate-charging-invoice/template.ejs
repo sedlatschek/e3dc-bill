@@ -28,7 +28,7 @@
 
     <div class="grid grid-cols-3 mt-3">
       <div>
-        <div class="text-pink-700 font-bold">Date <%= date.setZone(timezone).toFormat(dateFormat) %></div>
+        <div class="text-pink-700 font-bold">Date <%= invoiceDate.setZone(timezone).toFormat(dateFormat) %></div>
         <p class="mt-4">
           <% if(document === 'invoice'){ %>
           <span class="font-bold">Invoice for</span><br />

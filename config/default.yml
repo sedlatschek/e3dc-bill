@@ -1,6 +1,7 @@
 e3dc:
   username: user
   password: pass
+  wallbox: 111111111111
 localization:
   timezone: Europe/Berlin
   language: en
@@ -12,13 +13,10 @@ localization:
   vatRate: 0.19
 document:
   invoiceTitle: Invoice
-  invoiceNumber: 123
   refundTitle: Refund
   solarPositionTitle: Solar energy
   gridPositionTitle: Grid energy
-  date:
   project: XYZ
-  unitPrice: 0.312
   sender:
     name: John Doe
     address: |

@@ -8,11 +8,11 @@ import { authenticate } from '../../e3dc/auth.js';
 import { createPdf } from '../../pdf.js';
 
 type GenerateMonthlySheetOptions = {
+  invoiceDate: DateTime;
+  unitPrice: number;
+  invoiceNumber: string;
   from: DateTime;
   to: DateTime;
-  wallboxId: number;
-  username: string;
-  password: string;
 }
 
 const templateFileName = join(import.meta.dirname, 'template.ejs');
@@ -20,37 +20,55 @@ const template = await readFile(templateFileName, 'utf8');
 
 export default async (options: GenerateMonthlySheetOptions): Promise<void> => {
   const {
+    unitPrice,
+    invoiceDate,
+    invoiceNumber,
     from,
     to,
-    wallboxId,
-    username,
-    password,
   } = options;
 
   const authToken = await authenticate({
-    username,
-    password,
+    username: config.get<string>('e3dc.username'),
+    password: config.get<string>('e3dc.password'),
   });
   const api = new E3dcApi(authToken);
 
   const chargings = (await api.getChargings({
-    wallboxId,
+    wallboxId: config.get<number>('e3dc.wallbox'),
     from,
     to,
   }));
 
   await Promise.all([
-    createInvoice(chargings.filter((charging) => charging.energySolar > 0)),
-    createRefund(chargings.filter((charging) => charging.energyGrid > 0)),
+    createInvoice({
+      chargings: chargings.filter((charging) => charging.energySolar > 0),
+      unitPrice,
+      invoiceDate,
+      invoiceNumber,
+    }),
+    createRefund({
+      chargings: chargings.filter((charging) => charging.energyGrid > 0),
+      unitPrice,
+      invoiceDate,
+    }),
   ]);
 }
 
-async function createInvoice(chargings: Charging[]): Promise<void> {
+async function createInvoice(
+  options: {
+    chargings: Charging[],
+    unitPrice: number,
+    invoiceDate: DateTime
+    invoiceNumber: string,
+  },
+): Promise<void> {
+  const { chargings, unitPrice, invoiceDate, invoiceNumber } = options;
+
   const totalEnergy = chargings.reduce(
     (acc, charging) => acc + charging.energySolar,
     0,
   );
-  const subTotal = totalEnergy * config.get<number>('document.unitPrice');
+  const subTotal = totalEnergy * unitPrice;
   const vat = subTotal * config.get<number>('localization.vatRate');
   const total = subTotal + vat;
 
@@ -58,7 +76,9 @@ async function createInvoice(chargings: Charging[]): Promise<void> {
     ...config.get('document'),
     ...config.get('localization'),
     document: 'invoice',
-    date: getDate(),
+    invoiceDate,
+    invoiceNumber,
+    unitPrice,
     chargings,
     totalEnergy,
     subTotal,
@@ -72,18 +92,27 @@ async function createInvoice(chargings: Charging[]): Promise<void> {
   });
 }
 
-async function createRefund(chargings: Charging[]): Promise<void> {
+async function createRefund(
+  options: {
+    chargings: Charging[],
+    unitPrice: number,
+    invoiceDate: DateTime
+  },
+): Promise<void> {
+  const { chargings, unitPrice, invoiceDate } = options;
+
   const totalEnergy = chargings.reduce(
     (acc, charging) => acc + charging.energyGrid,
     0,
   );
-  const subTotal = totalEnergy * config.get<number>('document.unitPrice');
+  const subTotal = totalEnergy * unitPrice;
 
   const html = ejs.render(template, {
     ...config.get('document'),
     ...config.get('localization'),
     document: 'refund',
-    date: getDate(),
+    invoiceDate,
+    unitPrice,
     chargings,
     totalEnergy,
     subTotal,
@@ -94,14 +123,4 @@ async function createRefund(chargings: Charging[]): Promise<void> {
     html,
     path: 'refund.pdf',
   });
-}
-
-function getDate(): DateTime {
-  const configDate = config.get<string | undefined>('document.date');
-
-  if (configDate) {
-    return DateTime.fromISO(configDate);
-  }
-
-  return DateTime.now();
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command  } from 'commander';
-import generateMonthlySheet from './commands/generate-monthly-sheet/generate-monthly-sheet.js';
+import generateCharginInvoice from './commands/generate-charging-invoice/generate-charging-invoice.js';
 import { DateTime } from 'luxon';
 
 const program = new Command();
@@ -9,14 +9,21 @@ const program = new Command();
 program.name('e3dc-bill')
   .description('CLI to generate bills out of E3DC wallbox data');
 
-program.command('generate-monthly-sheet')
-  .description('generate a sheet with charging data of a given month')
+program.command('generate-charging-invoice')
+  .description('Generate a sheet with charging data of a timespan')
+  .option('--invoice-number <number>', 'Invoice number')
+  .option('--unit-price <price>', 'Unit price for energy')
+  .option('--invoice-date <date>', '(optional) Invoice date. Defaults to today.', undefined)
   .option('--from <date>', '(optional) ISO-8601 starting date from which the data is retrieved', DateTime.now().startOf('month').toISODate())
   .option('--to <date>', '(optional) ISO-8601 end date to which the data is retrieved', DateTime.now().endOf('month').toISODate())
-  .option('--wallbox <id>', 'E3DC wallbox id')
-  .option('--username <username>', 'username (usually email) to authenticate with E3DC')
-  .option('--password <password>', 'password to authenticate with E3DC')
   .action(async (options: Record<string, string>) => {
+    const invoiceDate = typeof options.invoiceDate === 'string'
+      ? DateTime.fromISO(options.invoiceDate)
+      : DateTime.now();
+    if (!invoiceDate.isValid) {
+      throw new Error('Invalid invoice date');
+    }
+
     const from = DateTime.fromISO(options.from);
     if (!from.isValid) {
       throw new Error('Invalid from date');
@@ -31,11 +38,10 @@ program.command('generate-monthly-sheet')
       throw new Error('to date must be after from date');
     }
 
-    const wallboxId = parseInt(options.wallbox, 10);
-
-    const { username, password } = options;
-
-    await generateMonthlySheet({
+    await generateCharginInvoice({
+      invoiceDate,
+      unitPrice: parseFloat(options.unitPrice),
+      invoiceNumber: options.invoiceNumber,
       from: from.set({
         hour: 0,
         minute: 0,
@@ -46,11 +52,8 @@ program.command('generate-monthly-sheet')
         hour: 23,
         minute: 59,
         second: 59,
-        millisecond:999,
+        millisecond: 999,
       }),
-      wallboxId,
-      username,
-      password,
     });
   });
 
