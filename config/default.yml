@@ -5,7 +5,8 @@ localization:
   timezone: Europe/Berlin
   language: en
   # https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens
-  dateformat: yyyy-MM-dd HH:mm:ss
+  dateFormat: yyyy-MM-dd
+  timeFormat: HH:mm:ss
   currency: €
   vatTitle: VAT
   vatRate: 0.19
@@ -15,7 +16,7 @@ document:
   refundTitle: Refund
   solarPositionTitle: Solar energy
   gridPositionTitle: Grid energy
-  date: Today
+  date:
   project: XYZ
   unitPrice: 0.312
   sender:

@@ -28,7 +28,7 @@
 
     <div class="grid grid-cols-3 mt-3">
       <div>
-        <div class="text-pink-700 font-bold">Date <%= date %></div>
+        <div class="text-pink-700 font-bold">Date <%= date.setZone(timezone).toFormat(dateFormat) %></div>
         <p class="mt-4">
           <% if(document === 'invoice'){ %>
           <span class="font-bold">Invoice for</span><br />
@@ -106,7 +106,10 @@
         <% } else { %>
         <td class="text-left"><%= (Math.round(charging.energyGrid * 1000) / 1000).toFixed(3) %> kw/h</td>
         <% }  %>
-        <td class="text-center"><%= charging.startAt.setZone(timezone).toFormat(dateformat) %> - <%= charging.stopAt.setZone(timezone).toFormat(dateformat) %></td>
+        <td class="text-center">
+          <%= charging.startAt.setZone(timezone).toFormat(dateFormat) %> <%= charging.startAt.setZone(timezone).toFormat(timeFormat) %> -
+          <%= charging.stopAt.setZone(timezone).toFormat(dateFormat) %> <%= charging.stopAt.setZone(timezone).toFormat(timeFormat) %>
+        </td>
         <td class="text-right font-mono"><%= charging.sessionID.split('-')[2] %></td>
       </tr>
       <% } %>

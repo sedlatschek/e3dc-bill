@@ -55,9 +55,10 @@ async function createInvoice(chargings: Charging[]): Promise<void> {
   const total = subTotal + vat;
 
   const html = ejs.render(template, {
-    document: 'invoice',
     ...config.get('document'),
     ...config.get('localization'),
+    document: 'invoice',
+    date: getDate(),
     chargings,
     totalEnergy,
     subTotal,
@@ -77,22 +78,30 @@ async function createRefund(chargings: Charging[]): Promise<void> {
     0,
   );
   const subTotal = totalEnergy * config.get<number>('document.unitPrice');
-  const vat = subTotal * config.get<number>('localization.vatRate');
-  const total = subTotal + vat;
 
   const html = ejs.render(template, {
-    document: 'refund',
     ...config.get('document'),
     ...config.get('localization'),
+    document: 'refund',
+    date: getDate(),
     chargings,
     totalEnergy,
     subTotal,
-    vat,
-    total,
+    total: subTotal,
   }, { async: false });
 
   await createPdf({
     html,
     path: 'refund.pdf',
   });
+}
+
+function getDate(): DateTime {
+  const configDate = config.get<string | undefined>('document.date');
+
+  if (configDate) {
+    return DateTime.fromISO(configDate);
+  }
+
+  return DateTime.now();
 }
