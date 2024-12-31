@@ -35,7 +35,10 @@ export default async (options: GenerateMonthlySheetOptions): Promise<void> => {
     to,
   }));
 
-  await createInvoice(chargings.filter((charging) => charging.energySolar > 0));
+  await Promise.all([
+    createInvoice(chargings.filter((charging) => charging.energySolar > 0)),
+    createRefund(chargings.filter((charging) => charging.energyGrid > 0)),
+  ]);
 }
 
 async function createInvoice(chargings: Charging[]): Promise<void> {
@@ -50,6 +53,7 @@ async function createInvoice(chargings: Charging[]): Promise<void> {
   const template = await readFile('src/commands/generate-monthly-sheet/invoice.ejs', 'utf8');
 
   const html = ejs.render(template, {
+    document: 'invoice',
     ...config.get('document'),
     ...config.get('localization'),
     chargings,
@@ -65,3 +69,30 @@ async function createInvoice(chargings: Charging[]): Promise<void> {
   });
 }
 
+async function createRefund(chargings: Charging[]): Promise<void> {
+  const totalEnergy = chargings.reduce(
+    (acc, charging) => acc + charging.energyGrid,
+    0,
+  );
+  const subTotal = totalEnergy * config.get<number>('document.unitPrice');
+  const vat = subTotal * config.get<number>('localization.vatRate');
+  const total = subTotal + vat;
+
+  const template = await readFile('src/commands/generate-monthly-sheet/invoice.ejs', 'utf8');
+
+  const html = ejs.render(template, {
+    document: 'refund',
+    ...config.get('document'),
+    ...config.get('localization'),
+    chargings,
+    totalEnergy,
+    subTotal,
+    vat,
+    total,
+  }, { async: false });
+
+  await createPdf({
+    html,
+    path: 'refund.pdf',
+  });
+}

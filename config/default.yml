@@ -13,7 +13,8 @@ document:
   invoiceTitle: Invoice
   invoiceNumber: 123
   refundTitle: Refund
-  positionTitle: Solar energy
+  solarPositionTitle: Solar energy
+  gridPositionTitle: Grid energy
   date: Today
   project: XYZ
   unitPrice: 0.312

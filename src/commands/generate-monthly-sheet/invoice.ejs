@@ -4,7 +4,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><%= invoiceTitle %></title>
+  <title>
+    <% if(document === 'invoice'){ %>
+    <%= invoiceTitle %> #<%= invoiceNumber %>
+    <% } else { %>
+    <%= refundTitle %>
+    <% } %>
+  </title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -17,21 +23,25 @@
     </p>
 
     <h1 class="mt-16 text-violet-600 text-5xl font-bold">
-      <%= invoiceTitle %>
+      <%= document === 'invoice' ? invoiceTitle : refundTitle %>
     </h1>
 
     <div class="grid grid-cols-3 mt-3">
       <div>
         <div class="text-pink-700 font-bold">Date <%= date %></div>
         <p class="mt-4">
+          <% if(document === 'invoice'){ %>
           <span class="font-bold">Invoice for</span><br />
+          <% } %>
           <span><%= recipient.name %></span><br />
           <span class="whitespace-pre"><%= recipient.address %></span>
         </p>
       </div>
       <div></div>
       <div>
+        <% if(document === 'invoice'){ %>
         <div class="font-bold"><%= invoiceTitle %> #<%= invoiceNumber %></div>
+        <% } %>
         <p class="mt-4">
           <span class="font-bold">Project</span><br />
           <span><%= project %></span>
@@ -51,11 +61,12 @@
     </thead>
     <tbody>
       <tr>
-        <td class="text-left"><%= positionTitle %></td>
+        <td class="text-left"><%= document === 'invoice' ? solarPositionTitle : gridPositionTitle %></td>
         <td class="text-center"><%= (Math.round(totalEnergy * 1000) / 1000).toFixed(3) %> kw/h</td>
         <td class="text-center"><%= currency %> <%= unitPrice %></td>
         <td class="text-right"><%= currency %> <%= (Math.round(subTotal * 100) / 100).toFixed(2) %></td>
       </tr>
+      <% if(document === 'invoice'){ %>
       <tr>
         <td colspan="3" class="text-right">Subtotal</td>
         <td class="text-right"><%= currency %> <%= (Math.round(subTotal * 100) / 100).toFixed(2) %></td>
@@ -64,6 +75,7 @@
         <td colspan="3" class="text-right"><%= vatTitle %> <%= vatRate * 100 %>%</td>
         <td class="text-right"><%= currency %> <%= (Math.round(vat * 100) / 100).toFixed(2) %></td>
       </tr>
+      <% } %>
       <tr>
         <td colspan="3" class="text-right">Total</td>
         <td class="text-right"><span class="font-bold"><%= currency %> <%= (Math.round(total * 100) / 100).toFixed(2) %></span></td>
@@ -89,7 +101,11 @@
     <tbody>
       <% for(const charging of chargings) { %>
       <tr>
+        <% if(document === 'invoice'){ %>
         <td class="text-left"><%= (Math.round(charging.energySolar * 1000) / 1000).toFixed(3) %> kw/h</td>
+        <% } else { %>
+        <td class="text-left"><%= (Math.round(charging.energyGrid * 1000) / 1000).toFixed(3) %> kw/h</td>
+        <% }  %>
         <td class="text-center"><%= charging.startAt.setZone(timezone).toFormat(dateformat) %> - <%= charging.stopAt.setZone(timezone).toFormat(dateformat) %></td>
         <td class="text-right font-mono"><%= charging.sessionID.split('-')[2] %></td>
       </tr>
