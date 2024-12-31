@@ -34,11 +34,14 @@ type ChargingResponse = {
   chargePriceTotal: (null | string)[];
 };
 
-type Charging = Omit<Objectified<ChargingResponse>, 'startAt' | 'stopAt' | 'createdAt' | 'updatedAt'> & {
+export type Charging = Omit<Objectified<ChargingResponse>, 'startAt' | 'stopAt' | 'createdAt' | 'updatedAt' | 'energyAll' | 'energySolar'> & {
   startAt: DateTime;
   stopAt: DateTime;
   createdAt: DateTime;
   updatedAt: DateTime;
+  energyAll: number;
+  energySolar: number;
+  energyGrid: number;
 }
 
 export class E3dcApi {
@@ -69,12 +72,20 @@ export class E3dcApi {
 
     const chargings = objectify(response.data);
 
-    return chargings.map((charging) => ({
-      ...charging,
-      startAt: DateTime.fromISO(charging.startAt),
-      stopAt: DateTime.fromISO(charging.stopAt),
-      createdAt: DateTime.fromISO(charging.createdAt),
-      updatedAt: DateTime.fromISO(charging.updatedAt),
-    })).filter((charging) => charging.startAt >= from && charging.stopAt <= to);
+    return chargings.map((charging) => {
+      const energyAll = parseFloat(charging.energyAll) / 1000;
+      const energySolar = parseFloat(charging.energySolar) / 1000;
+      const energyGrid = energyAll - energySolar / 1000;
+      return {
+        ...charging,
+        startAt: DateTime.fromISO(charging.startAt),
+        stopAt: DateTime.fromISO(charging.stopAt),
+        createdAt: DateTime.fromISO(charging.createdAt),
+        updatedAt: DateTime.fromISO(charging.updatedAt),
+        energyAll,
+        energySolar,
+        energyGrid,
+      }
+    }).filter((charging) => charging.startAt >= from && charging.stopAt <= to);
   }
 }

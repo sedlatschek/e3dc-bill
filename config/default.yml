@@ -1,0 +1,36 @@
+e3dc:
+  username: user
+  password: pass
+localization:
+  timezone: Europe/Berlin
+  language: en
+  # https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens
+  dateformat: yyyy-MM-dd HH:mm:ss
+  currency: €
+  vatTitle: VAT
+  vatRate: 0.19
+document:
+  invoiceTitle: Invoice
+  invoiceNumber: 123
+  refundTitle: Refund
+  positionTitle: Solar energy
+  date: Today
+  project: XYZ
+  unitPrice: 0.312
+  sender:
+    name: John Doe
+    address: |
+      1234 Elm St
+      Springfield, IL 62701
+    taxId: 123-45-6789
+    bank:
+      name: Generic Bank
+      account: 1234567890
+      routing: 0987654321
+      bic: GENBUS66
+      iban: US1234567890987654321
+  recipient:
+    name: Generic Corporation Ltd
+    address: |
+      5678 Oak St
+      Springfield, IL 62701

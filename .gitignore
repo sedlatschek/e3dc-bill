@@ -1,3 +1,5 @@
 .werk
 dist
 node_modules
+config/local.yml
+*.pdf

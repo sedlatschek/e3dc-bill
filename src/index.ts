@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command  } from 'commander';
-import generateMonthlySheet from './commands/generate-monthly-sheet.js';
+import generateMonthlySheet from './commands/generate-monthly-sheet/generate-monthly-sheet.js';
 import { DateTime } from 'luxon';
 
 const program = new Command();

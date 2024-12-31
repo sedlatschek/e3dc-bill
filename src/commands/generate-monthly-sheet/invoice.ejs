@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="<%= language %>">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= invoiceTitle %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="antialiased">
+  <header>
+    <p>
+      <span class="font-bold"><%= sender.name %></span><br />
+      <span class="whitespace-pre"><%= sender.address %></span>
+      <span>Tax-ID: <%= sender.taxId %><br /></span>
+    </p>
+
+    <h1 class="mt-16 text-violet-600 text-5xl font-bold">
+      <%= invoiceTitle %>
+    </h1>
+
+    <div class="grid grid-cols-3 mt-3">
+      <div>
+        <div class="text-pink-700 font-bold">Date <%= date %></div>
+        <p class="mt-4">
+          <span class="font-bold">Invoice for</span><br />
+          <span><%= recipient.name %></span><br />
+          <span class="whitespace-pre"><%= recipient.address %></span>
+        </p>
+      </div>
+      <div></div>
+      <div>
+        <div class="font-bold"><%= invoiceTitle %> #<%= invoiceNumber %></div>
+        <p class="mt-4">
+          <span class="font-bold">Project</span><br />
+          <span><%= project %></span>
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <table class="mt-12 table-auto w-full">
+    <thead class="text-violet-600 font-bold">
+      <tr class="border-b-2 border-violet-600">
+        <th class="text-left">Description</th>
+        <th class="text-center">Quantity</th>
+        <th class="text-center">Unit price</th>
+        <th class="text-right">Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="text-left"><%= positionTitle %></td>
+        <td class="text-center"><%= (Math.round(totalEnergy * 1000) / 1000).toFixed(3) %> kw/h</td>
+        <td class="text-center"><%= currency %> <%= unitPrice %></td>
+        <td class="text-right"><%= currency %> <%= (Math.round(subTotal * 100) / 100).toFixed(2) %></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="text-right">Subtotal</td>
+        <td class="text-right"><%= currency %> <%= (Math.round(subTotal * 100) / 100).toFixed(2) %></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="text-right"><%= vatTitle %> <%= vatRate * 100 %>%</td>
+        <td class="text-right"><%= currency %> <%= (Math.round(vat * 100) / 100).toFixed(2) %></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="text-right">Total</td>
+        <td class="text-right"><span class="font-bold"><%= currency %> <%= (Math.round(total * 100) / 100).toFixed(2) %></span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <footer class="text-sm mt-12 text-center break-inside-avoid">
+    <%= sender.bank.name %>, Account number: <%= sender.bank.account %>, Routing number: <%= sender.bank.routing %><br />
+    BIC: <%= sender.bank.bic %>, IBAN: <%= sender.bank.iban %>
+  </footer>
+
+  <div class="break-after-page"></div>
+
+  <table class="table-auto w-full">
+    <thead class="text-violet-600 font-bold">
+      <tr class="border-b-2 border-violet-600">
+        <th class="text-left">Quantity</th>
+        <th class="text-center">Timespan</th>
+        <th class="text-right">Session Identifier</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for(const charging of chargings) { %>
+      <tr>
+        <td class="text-left"><%= (Math.round(charging.energySolar * 1000) / 1000).toFixed(3) %> kw/h</td>
+        <td class="text-center"><%= charging.startAt.setZone(timezone).toFormat(dateformat) %> - <%= charging.stopAt.setZone(timezone).toFormat(dateformat) %></td>
+        <td class="text-right font-mono"><%= charging.sessionID.split('-')[2] %></td>
+      </tr>
+      <% } %>
+    </tbody>
+  </table>
+</body>
+
+</html>

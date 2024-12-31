@@ -21,6 +21,7 @@
   "homepage": "https://github.com/sedlatschek/e3dc-bill#readme",
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@types/ejs": "^3.1.5",
     "@types/jsdom": "^21.1.7",
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.10.2",
@@ -32,11 +33,17 @@
     "typescript-eslint": "^8.19.0"
   },
   "dependencies": {
+    "@types/config": "^3.3.5",
+    "@types/js-yaml": "^4.0.9",
     "axios": "^1.7.9",
     "axios-cookiejar-support": "^5.0.5",
     "commander": "^13.0.0",
+    "config": "^3.3.12",
+    "ejs": "^3.1.10",
+    "js-yaml": "^4.1.0",
     "jsdom": "^25.0.1",
     "luxon": "^3.5.0",
+    "puppeteer": "^23.11.1",
     "tough-cookie": "^5.0.0"
   }
 }
