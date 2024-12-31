@@ -36,8 +36,18 @@ program.command('generate-monthly-sheet')
     const { username, password } = options;
 
     await generateMonthlySheet({
-      from,
-      to,
+      from: from.set({
+        hour: 0,
+        minute: 0,
+        second: 0,
+        millisecond: 0,
+      }),
+      to: to.set({
+        hour: 23,
+        minute: 59,
+        second: 59,
+        millisecond:999,
+      }),
       wallboxId,
       username,
       password,
