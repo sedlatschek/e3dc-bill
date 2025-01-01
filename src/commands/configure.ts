@@ -19,6 +19,9 @@ export default async (): Promise<void> => {
   }
   console.log('Opening config file in your default editor');
   console.log('Make your changes and save the file to apply them.');
+
   await sleep(1000);
-  await open(localConfigFileName);
+
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  open(localConfigFileName);
 };
