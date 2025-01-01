@@ -2,7 +2,7 @@ import { existsSync } from 'fs';
 import { copyFile } from 'fs/promises'
 import { join } from 'path';
 import open from 'open';
-import { configDirectory } from '../config';
+import { configDirectory } from '../config.js';
 
 const defaultConfigFileName = join(configDirectory, 'default.yml');
 const localConfigFileName = join(configDirectory, 'local.yml');

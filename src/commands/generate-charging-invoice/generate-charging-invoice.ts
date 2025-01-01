@@ -3,10 +3,10 @@ import { readFile } from 'fs/promises';
 import config from 'config';
 import ejs from 'ejs';
 import { DateTime } from 'luxon';
+import slugify from 'slugify';
 import { Charging, E3dcApi } from '../../e3dc/E3dcApi.js';
 import { authenticate } from '../../e3dc/auth.js';
 import { createPdf } from '../../pdf.js';
-import slugify from 'slugify';
 
 type GenerateChargingInvoiceOptions = {
   invoiceDate: DateTime;

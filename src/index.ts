@@ -5,10 +5,13 @@ import { Command  } from 'commander';
 import { DateTime } from 'luxon';
 import configureCommand from './commands/configure.js';
 import generateCharginInvoiceCommand from './commands/generate-charging-invoice/generate-charging-invoice.js';
+import { bootstrap } from './config.js';
 
-const program = new Command();
+bootstrap();
 
 console.log('\x1b[35m%s\x1b[0m', `${name} v${version}`);
+
+const program = new Command();
 
 program.name(name)
   .version(version)
