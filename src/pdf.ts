@@ -29,4 +29,5 @@ export async function createPdf(options: CreatePdfOptions): Promise<void> {
   });
 
   await page.close();
+  await browser.close();
 };
