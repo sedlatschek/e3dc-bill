@@ -6,6 +6,7 @@ import { DateTime } from 'luxon';
 import { Charging, E3dcApi } from '../../e3dc/E3dcApi.js';
 import { authenticate } from '../../e3dc/auth.js';
 import { createPdf } from '../../pdf.js';
+import slugify from 'slugify';
 
 type GenerateChargingInvoiceOptions = {
   invoiceDate: DateTime;
@@ -67,7 +68,10 @@ async function createInvoice(
   },
 ): Promise<void> {
   const { chargings, unitPrice, invoiceDate, invoiceNumber } = options;
-  const path = 'invoice.pdf';
+  const path = getFilename({
+    invoiceDate,
+    document: `Invoice-${invoiceNumber}`,
+  });
 
   const totalEnergy = chargings.reduce(
     (acc, charging) => acc + charging.energySolar,
@@ -107,7 +111,10 @@ async function createRefund(
   },
 ): Promise<void> {
   const { chargings, unitPrice, invoiceDate } = options;
-  const path = 'refund.pdf';
+  const path = getFilename({
+    invoiceDate,
+    document: 'Refund',
+  });
 
   const totalEnergy = chargings.reduce(
     (acc, charging) => acc + charging.energyGrid,
@@ -133,4 +140,15 @@ async function createRefund(
   });
 
   console.log('\x1b[32m%s\x1b[0m', `🡒 Generated ${path}`);
+}
+
+function getFilename(
+  options: {
+    invoiceDate: DateTime,
+    document: string,
+  },
+): string {
+  const { invoiceDate, document } = options;
+  const recipient = slugify(config.get<string>('document.recipient.name'));
+  return `${invoiceDate.toFormat('yyyy-MM-dd')}_${recipient}_${document}.pdf`;
 }
