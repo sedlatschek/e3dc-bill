@@ -5,9 +5,6 @@ import { DateTime } from 'luxon';
 import configureCommand from './commands/configure.js';
 import generateCharginInvoiceCommand from './commands/generate-charging-invoice/generate-charging-invoice.js';
 import { getPackage } from './package.js';
-import { bootstrap } from './config.js';
-
-bootstrap();
 
 const { name, version } = getPackage();
 console.log('\x1b[35m%s\x1b[0m', `${name} v${version}`);
