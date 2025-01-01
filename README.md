@@ -32,4 +32,3 @@ Options:
   --to <date>                (optional) ISO-8601 end date to which the data is retrieved (default: "2024-12-31")
   -h, --help                 display help for command
 ```
-
