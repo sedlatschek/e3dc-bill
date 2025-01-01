@@ -58,6 +58,8 @@ export class E3dcApi {
     from: DateTime,
     to: DateTime,
   }): Promise<Charging[]> {
+    console.log('\x1b[36m%s\x1b[0m', 'Retrieving chargings');
+
     const { wallboxId, from, to } = options;
 
     const response = await this.axiosClient<ChargingResponse>({
@@ -72,7 +74,10 @@ export class E3dcApi {
 
     const chargings = objectify(response.data);
 
-    return chargings.map((charging) => {
+    console.log('\x1b[32m%s\x1b[0m', `🡒 got ${chargings.length} in total`);
+    console.log('\x1b[36m%s\x1b[0m', 'Filtering chargings');
+
+    const filteredChargings = chargings.map((charging) => {
       const energyAll = parseFloat(charging.energyAll) / 1000;
       const energySolar = parseFloat(charging.energySolar) / 1000;
       const energyGrid = energyAll - energySolar / 1000;
@@ -87,5 +92,9 @@ export class E3dcApi {
         energyGrid,
       }
     }).filter((charging) => charging.startAt >= from && charging.stopAt <= to);
+
+    console.log('\x1b[32m%s\x1b[0m', `🡒 got ${filteredChargings.length} within the timespan`);
+
+    return filteredChargings;
   }
 }

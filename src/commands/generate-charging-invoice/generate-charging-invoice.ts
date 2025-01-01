@@ -7,7 +7,7 @@ import { Charging, E3dcApi } from '../../e3dc/E3dcApi.js';
 import { authenticate } from '../../e3dc/auth.js';
 import { createPdf } from '../../pdf.js';
 
-type GenerateMonthlySheetOptions = {
+type GenerateChargingInvoiceOptions = {
   invoiceDate: DateTime;
   unitPrice: number;
   invoiceNumber: string;
@@ -18,7 +18,9 @@ type GenerateMonthlySheetOptions = {
 const templateFileName = join(import.meta.dirname, 'template.ejs');
 const template = await readFile(templateFileName, 'utf8');
 
-export default async (options: GenerateMonthlySheetOptions): Promise<void> => {
+export default async (
+  options: GenerateChargingInvoiceOptions,
+): Promise<void> => {
   const {
     unitPrice,
     invoiceDate,
@@ -38,6 +40,8 @@ export default async (options: GenerateMonthlySheetOptions): Promise<void> => {
     from,
     to,
   }));
+
+  console.log('\x1b[34m%s\x1b[0m', 'Generating documents');
 
   await Promise.all([
     createInvoice({
@@ -63,6 +67,7 @@ async function createInvoice(
   },
 ): Promise<void> {
   const { chargings, unitPrice, invoiceDate, invoiceNumber } = options;
+  const path = 'invoice.pdf';
 
   const totalEnergy = chargings.reduce(
     (acc, charging) => acc + charging.energySolar,
@@ -88,8 +93,10 @@ async function createInvoice(
 
   await createPdf({
     html,
-    path: 'invoice.pdf',
+    path,
   });
+
+  console.log('\x1b[32m%s\x1b[0m', `🡒 Generated ${path}`);
 }
 
 async function createRefund(
@@ -100,6 +107,7 @@ async function createRefund(
   },
 ): Promise<void> {
   const { chargings, unitPrice, invoiceDate } = options;
+  const path = 'refund.pdf';
 
   const totalEnergy = chargings.reduce(
     (acc, charging) => acc + charging.energyGrid,
@@ -121,6 +129,8 @@ async function createRefund(
 
   await createPdf({
     html,
-    path: 'refund.pdf',
+    path,
   });
+
+  console.log('\x1b[32m%s\x1b[0m', `🡒 Generated ${path}`);
 }

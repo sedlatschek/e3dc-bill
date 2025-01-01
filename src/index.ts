@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { name, version } from '../package.json';
 import { Command  } from 'commander';
 import { DateTime } from 'luxon';
 import configureCommand from './commands/configure.js';
@@ -7,7 +8,10 @@ import generateCharginInvoiceCommand from './commands/generate-charging-invoice/
 
 const program = new Command();
 
-program.name('e3dc-bill')
+console.log('\x1b[35m%s\x1b[0m', `${name} v${version}`);
+
+program.name(name)
+  .version(version)
   .description('CLI to generate bills out of E3DC wallbox data');
 
 program.command('configure').action(configureCommand);

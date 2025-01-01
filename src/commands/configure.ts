@@ -17,7 +17,7 @@ export default async (): Promise<void> => {
   if (!existsSync(localConfigFileName)) {
     await copyFile(defaultConfigFileName, localConfigFileName);
   }
-  console.log('Opening config file in your default editor...');
+  console.log('Opening config file in your default editor');
   console.log('Make your changes and save the file to apply them.');
   await sleep(1000);
   await open(localConfigFileName);

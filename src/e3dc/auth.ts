@@ -26,13 +26,20 @@ export async function authenticate(
     password: string,
   },
 ): Promise<string> {
+  console.log('\x1b[31m%s\x1b[0m', 'Authenticating');
+
   const { username, password } = options;
   const authState = await getAuthState();
   const samlResponse = await getSAMLResponse({
     username,
     password,
-    authState});
-  return getToken(samlResponse);
+    authState,
+  });
+  const token = await getToken(samlResponse);
+
+  console.log('\x1b[32m%s\x1b[0m', '🡒 OK');
+
+  return token;
 }
 
 function throwHtmlErrorIfExists(dom: JSDOM): void {
@@ -43,7 +50,7 @@ function throwHtmlErrorIfExists(dom: JSDOM): void {
 }
 
 async function getAuthState(): Promise<string> {
-  console.log('Pinging login page to retrieve AuthState...');
+  console.log('\x1b[31m%s\x1b[0m', '🡒 Pinging login page to retrieve AuthState');
 
   const response = await getAuthClient()({
     method: 'get',
@@ -78,7 +85,7 @@ async function getSAMLResponse(
     authState: string,
   },
 ): Promise<string> {
-  console.log('Sending login request...');
+  console.log('\x1b[31m%s\x1b[0m', '🡒 Sending login request');
 
   const { username, password, authState } = options;
 
@@ -119,7 +126,7 @@ async function getSAMLResponse(
 }
 
 async function getToken(samlResponse: string): Promise<string> {
-  console.log('Retrieving Api authentication token...');
+  console.log('\x1b[31m%s\x1b[0m', '🡒 Retrieving Api authentication token');
 
   const form = new FormData();
   form.append('SAMLResponse', samlResponse);
