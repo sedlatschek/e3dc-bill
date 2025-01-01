@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 
 import { Command  } from 'commander';
-import generateCharginInvoice from './commands/generate-charging-invoice/generate-charging-invoice.js';
 import { DateTime } from 'luxon';
+import configureCommand from './commands/configure.js';
+import generateCharginInvoiceCommand from './commands/generate-charging-invoice/generate-charging-invoice.js';
 
 const program = new Command();
 
 program.name('e3dc-bill')
   .description('CLI to generate bills out of E3DC wallbox data');
+
+program.command('configure').action(configureCommand);
 
 program.command('generate-charging-invoice')
   .description('Generate a sheet with charging data of a timespan')
@@ -16,7 +19,7 @@ program.command('generate-charging-invoice')
   .option('--invoice-date <date>', '(optional) Invoice date. Defaults to today.', undefined)
   .option('--from <date>', '(optional) ISO-8601 starting date from which the data is retrieved', DateTime.now().startOf('month').toISODate())
   .option('--to <date>', '(optional) ISO-8601 end date to which the data is retrieved', DateTime.now().endOf('month').toISODate())
-  .action(async (options: Record<string, string>) => {
+  .action(async (options: Record<string, string>): Promise<void> => {
     const invoiceDate = typeof options.invoiceDate === 'string'
       ? DateTime.fromISO(options.invoiceDate)
       : DateTime.now();
@@ -38,7 +41,7 @@ program.command('generate-charging-invoice')
       throw new Error('to date must be after from date');
     }
 
-    await generateCharginInvoice({
+    await generateCharginInvoiceCommand({
       invoiceDate,
       unitPrice: parseFloat(options.unitPrice),
       invoiceNumber: options.invoiceNumber,

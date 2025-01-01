@@ -53,6 +53,7 @@
     "js-yaml": "^4.1.0",
     "jsdom": "^25.0.1",
     "luxon": "^3.5.0",
+    "open": "^10.1.0",
     "puppeteer": "^23.11.1",
     "tough-cookie": "^5.0.0"
   },
@@ -60,6 +61,7 @@
     "e3dc-bill": "dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "config/default.yml"
   ]
 }

@@ -1,6 +1,6 @@
 e3dc:
-  username: user
-  password: pass
+  username: user@example.org
+  password: p4sSw0Rd
   wallbox: 111111111111
 localization:
   timezone: Europe/Berlin

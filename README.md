@@ -6,6 +6,8 @@ CLI to generate bills out of E3DC wallbox data.
 
 ```sh
 npm install -g e3dc-bill
+
+e3dc-bill configure
 ```
 
 ## Usage
@@ -16,7 +18,7 @@ e3dc-bill generate-charging-invoice --help
 
 returns
 
-```sh
+```
 Usage: e3dc-bill generate-charging-invoice [options]
 
 Generate a sheet with charging data of a timespan
