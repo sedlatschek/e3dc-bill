@@ -80,7 +80,7 @@ export class E3dcApi {
     const filteredChargings = chargings.map((charging) => {
       const energyAll = parseFloat(charging.energyAll) / 1000;
       const energySolar = parseFloat(charging.energySolar) / 1000;
-      const energyGrid = energyAll - energySolar / 1000;
+      const energyGrid = energyAll - energySolar;
       return {
         ...charging,
         startAt: DateTime.fromISO(charging.startAt),
