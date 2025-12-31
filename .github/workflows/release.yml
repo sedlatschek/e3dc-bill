@@ -26,3 +26,5 @@ jobs:
       - run: npm test
       - run: npm publish
       - uses: ncipollo/release-action@v1
+        with:
+          generateReleaseNotes: true
