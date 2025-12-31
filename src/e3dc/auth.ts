@@ -1,154 +1,143 @@
-
 import axios, { AxiosInstance } from 'axios';
-import { JSDOM } from 'jsdom';
 import { wrapper } from 'axios-cookiejar-support';
 import { CookieJar } from 'tough-cookie';
 
+const LOGIN_ACTION_REGEX = /"loginAction": "(.+)",/;
+const REDIRECT_URL_REGEX = /token=(.+)&reAuthToken/;
+// eslint-disable-next-line max-len
+const ASSERT_ACTION_REGEX = /"samlPost"\s*:\s*\{\s*(?:(?!\}\s*,).)*?"SAMLResponse"\s*:\s*"(?<SAMLResponse>[^"]+)"\s*,\s*"url"\s*:\s*"(?<url>[^"]+)/;
+
 let authClient: AxiosInstance | undefined;
-function getAuthClient(): AxiosInstance
-{
+function getAuthClient(): AxiosInstance {
   if (!authClient) {
     const cookieJar = new CookieJar();
-    authClient = wrapper(axios.create({
-      jar: cookieJar,
-      withCredentials: true,
-    }));
+    authClient = wrapper(
+      axios.create({
+        jar: cookieJar,
+        withCredentials: true,
+      }),
+    );
   }
   return authClient;
+}
+
+type LoginActionResponse = {
+  samlResponse: string;
+  assertUrl: string;
 }
 
 /**
  * @returns JWT
  */
-export async function authenticate(
-  options: {
-    username: string,
-    password: string,
-  },
-): Promise<string> {
+export async function authenticate(options: {
+  username: string;
+  password: string;
+}): Promise<string> {
   console.log('\x1b[31m%s\x1b[0m', 'Authenticating');
 
+  const loginActionUrl = await getLoginActionUrl();
   const { username, password } = options;
-  const authState = await getAuthState();
-  const samlResponse = await getSAMLResponse({
-    username,
-    password,
-    authState,
-  });
-  const token = await getToken(samlResponse);
+  const {
+    samlResponse,
+    assertUrl,
+  } = await performLoginAction(loginActionUrl, username, password);
+  const token = await getToken(samlResponse, assertUrl);
 
   console.log('\x1b[32m%s\x1b[0m', '🡒 OK');
 
   return token;
 }
 
-function throwHtmlErrorIfExists(dom: JSDOM): void {
-  const errorMessage = dom.window.document.querySelector('div.error-message > div.body2');
-  if (errorMessage) {
-    throw new Error(errorMessage.innerHTML.trim());
-  }
-}
-
-async function getAuthState(): Promise<string> {
-  console.log('\x1b[31m%s\x1b[0m', '🡒 Pinging login page to retrieve AuthState');
+async function getLoginActionUrl(): Promise<string> {
+  console.log('\x1b[31m%s\x1b[0m', '🡒 Retrieving Login Action URL');
 
   const response = await getAuthClient()({
     method: 'get',
     url: 'https://e3dc.e3dc.com/auth-saml/service-providers/customer/login?app=e3dc',
-    withCredentials: true,
+    headers: {
+      Referer: 'https://my.e3dc.com/',
+    },
   });
-
   if (typeof response.data !== 'string') {
     throw new Error('Unexpected response data type');
   }
 
-  const dom = new JSDOM(response.data);
-  throwHtmlErrorIfExists(dom);
+  const matches =  response.data.match(LOGIN_ACTION_REGEX);
 
-  const authStateInput = dom.window.document.querySelector('input[name="AuthState"]');
-  if (!authStateInput) {
-    throw new Error('AuthState input not found');
+  if (!matches?.[1]) {
+    throw new Error('Login action URL not found');
   }
 
-  const authState = authStateInput.getAttribute('value');
-  if (!authState) {
-    throw new Error('AuthState is not set');
-  }
-
-  return authState;
+  return matches[1];
 }
 
-async function getSAMLResponse(
-  options: {
-    username: string,
-    password: string,
-    authState: string,
-  },
-): Promise<string> {
-  console.log('\x1b[31m%s\x1b[0m', '🡒 Sending login request');
-
-  const { username, password, authState } = options;
+async function performLoginAction(
+  url: string,
+  username: string,
+  password: string,
+): Promise<LoginActionResponse> {
+  console.log('\x1b[31m%s\x1b[0m', '🡒 Performing Login Action');
 
   const form = new FormData();
   form.append('username', username);
   form.append('password', password);
-  form.append('AuthState', authState);
+  form.append('credentialId', '');
 
   const response = await getAuthClient()({
     method: 'post',
-    url: 'https://customer.sso.e3dc.com/module.php/core/loginuserpass.php',
-    withCredentials: true,
+    url,
     data: form,
     headers: {
-      Origin: 'https://customer.sso.e3dc.com',
+      Referer: 'https://my.e3dc.com/',
     },
-  });
-
+  })
 
   if (typeof response.data !== 'string') {
     throw new Error('Unexpected response data type');
   }
 
-  const dom = new JSDOM(response.data);
-  throwHtmlErrorIfExists(dom);
+  const matches = response.data.match(ASSERT_ACTION_REGEX);
 
-  const samlResponseInput = dom.window.document.querySelector('input[name="SAMLResponse"]');
-  if (!samlResponseInput) {
-    throw new Error('SAMLResponse input not found');
+  if (!matches?.groups?.SAMLResponse) {
+    throw new Error('SAMLResponse not found');
   }
 
-  const samlResponse = samlResponseInput.getAttribute('value');
-  if (!samlResponse) {
-    throw new Error('SAMLResponse is not set');
+  if (!matches?.groups?.url) {
+    throw new Error('Assert URL not found');
   }
 
-  return samlResponse;
+  const samlResponse = matches.groups.SAMLResponse;
+  const assertUrl = matches.groups.url;
+
+  return {
+    samlResponse,
+    assertUrl,
+  }
 }
 
-async function getToken(samlResponse: string): Promise<string> {
-  console.log('\x1b[31m%s\x1b[0m', '🡒 Retrieving Api authentication token');
+async function getToken(samlResponse: string, url: string): Promise<string> {
+  console.log('\x1b[31m%s\x1b[0m', '🡒 Retrieving Token');
 
   const form = new FormData();
   form.append('SAMLResponse', samlResponse);
 
   const response = await getAuthClient()({
     method: 'post',
-    url: 'https://e3dc.e3dc.com/auth-saml/service-providers/customer/assert',
-    headers: {
-      Origin: 'https://customer.sso.e3dc.com',
-      Referer: 'https://customer.sso.e3dc.com',
-    },
+    url,
     data: form,
+    headers: {
+      Origin: null,
+    },
   });
 
-  const request = response.request as { res: { responseUrl: unknown }};
+  const request = response.request as { res: { responseUrl: unknown } };
   const redirectUrl = request.res.responseUrl;
 
   if (typeof redirectUrl !== 'string') {
     throw new Error('Unexpected responseUrl type');
   }
 
-  const matches = redirectUrl.match(/token=(.+)&reAuthToken/);
+  const matches = redirectUrl.match(REDIRECT_URL_REGEX);
 
   if (matches?.length !== 2) {
     throw new Error('Unexpected input for redirectUrl');
