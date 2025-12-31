@@ -25,7 +25,4 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm publish
-      - uses: marvinpinto/action-automatic-releases@v1.2.1
-        with:
-          repo_token: '${{ secrets.GITHUB_TOKEN }}'
-          prerelease: false
+      - uses: ncipollo/release-action@v1
