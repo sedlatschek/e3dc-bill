@@ -1,7 +1,7 @@
 {
   "name": "e3dc-bill",
   "description": "CLI to generate bills out of E3DC wallbox data.",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "main": "dist/index.js",
   "type": "module",
   "keywords": [
